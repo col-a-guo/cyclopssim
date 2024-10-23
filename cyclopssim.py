@@ -3,9 +3,11 @@ build_id = 0
 level = 1
 gold = 300
 skilllag = 0.3
-skillcds = [[8.5 for i in range(6)], [13-i*0.5 for i in range(6)], [43 for i in range(6)]]
+skillcds = [[8.5 for i in range(6)], [14-i*0.8 for i in range(6)], [43 for i in range(3)]]
+skilllevels = [[1,1,1,1,1,2,2,2,2,3,3,3,4,5,6],[0,1,2,2,3,3,4,4,5,5,6,6,6,6,6],[0,0,0,1,1,1,1,2,2,2,2,3,3,3,3]]
+
 multihit = [2,5,1] #number hit for cdr reasons
-skilldmg = [400, 350, 880]
+skilldmg = [[275+25*i for i in range(6)], [200+30*i for i in range(6)], [550,715,880]]
 skillscaling = [.6, .5, 2.2]
 AoE = [3, 4.108, 1] #number hit per cast; 4.108 represents 22% damage falloff after first hit
 
@@ -27,23 +29,20 @@ itemnames = [["CDboots", "CDbook", "LT", "GW", "CE", "HC", "Mpot"],["CDboots", "
 
 items_toggled = []
 
-#build1: 30 (Emblems) + 50 (Book) + 75 (LT) + 75 (GW) + 105 (CE) + 5 (little book), increase magic damage by 12% sometimes
-#build2: 30 (Emblems) + 50 (Book) + 75 (LT) + 75 (GW) + 185 (HC), multiply magic power by 1.32
-magicpower = 0
 magicdamagemult = 1
-mmultindex = 0
+mmultindex = 0 #for Concentrated Energy
+LTcooldown = 0 #for Lightning Truncheon
 six_hit_count_conc_energy = 0
-
-
 
 damage_total = 0
 healing = 0
 
-update_flag = False
+update_flag = True
 
 for milli in range(200000):
     #check for purchases
-    for itemid in itemthresholds[build_id]:
+    LTcooldown -= 1
+    for itemid, threshold in enumerate(itemthresholds[build_id]):
         goldcost = 0
         goldcost += itemthresholds[build_id][itemid]
         if gold > goldcost:
@@ -65,7 +64,6 @@ for milli in range(200000):
         magicpower = base_mp[build_id]+six_hit_count_conc_energy*5
         if "HC" in items_toggled:
             magicpower *= (1+.21+.01*level)
-       
         if "GW" in items_toggled:
             mpen += 10
             mreduce = level*.9+9
@@ -74,8 +72,13 @@ for milli in range(200000):
         update_flag = False
     for j in range(3):
         skillcount[j]+=1
-        if skillcount[j] > skillcds[j][level]*1000*(1-cdr)+skilllag*1000:
+        skilllevel = skilllevels[j]
+        if skillcount[j] > skillcds[j][skilllevel]*1000*(1-cdr)+skilllag*1000:
             castcount[j] += 1
+            if "DG" in items_toggled and LTcooldown <= 0:
+                damage_total += 120*magicpower*120/(120+enemy_mr-mpen)*2
+            else:
+                LTcooldown = 6000
             if six_hit_count_conc_energy > 5:
                 magicdamagemult = 1.12
                 six_hit_count_conc_energy = 0
@@ -92,7 +95,7 @@ for milli in range(200000):
                     mmultindex += 1
 
             skillcount[j] = 0
-            damage_total += (skilldmg[j]+skillscaling[j]*magicpower)*100/(100+enemy_mr-mpen)*AoE[j]
+            damage_total += (skilldmg[j][skilllevel]+skillscaling[j]*magicpower)*120/(120+enemy_mr-mpen)*AoE[j]
             for skilli in range(3):
                 for hit in range(multihit[j]):
                     skillcount[skilli] += 500
