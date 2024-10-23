@@ -1,5 +1,5 @@
 #Hero Variables
-build_id = 0
+build_id = 1
 level = 1
 gold = 300
 skilllag = 0.3
@@ -39,7 +39,7 @@ healing = 0
 
 update_flag = True
 
-for milli in range(200000):
+for milli in range(1200000):
     #check for purchases
     LTcooldown -= 1
     for itemid, threshold in enumerate(itemthresholds[build_id]):
@@ -75,7 +75,7 @@ for milli in range(200000):
         skilllevel = skilllevels[j][level-1]
         if skilllevel > 0 and skillcount[j] > skillcds[j][skilllevel-1]*1000*(1-cdr)+skilllag*1000:
             castcount[j] += 1
-            if "DG" in items_toggled and LTcooldown <= 0:
+            if "LT" in items_toggled and LTcooldown <= 0:
                 damage_total += 120*magicpower*120/(120+enemy_mr-mpen)*2
             else:
                 LTcooldown = 6000
