@@ -52,7 +52,7 @@ for milli in range(200000):
                 items_toggled.append(itemnames[itemid])
                 update_flag = True
     #check for levels
-    if (milli+1)%6000 == 0:
+    if (milli+1)%6000 == 0 and level < 15:
         level+=1
         update_flag = True
     #update variables
@@ -72,8 +72,8 @@ for milli in range(200000):
         update_flag = False
     for j in range(3):
         skillcount[j]+=1
-        skilllevel = skilllevels[j]
-        if skillcount[j] > skillcds[j][skilllevel]*1000*(1-cdr)+skilllag*1000:
+        skilllevel = skilllevels[j][level-1]
+        if skilllevel > 0 and skillcount[j] > skillcds[j][skilllevel-1]*1000*(1-cdr)+skilllag*1000:
             castcount[j] += 1
             if "DG" in items_toggled and LTcooldown <= 0:
                 damage_total += 120*magicpower*120/(120+enemy_mr-mpen)*2
@@ -95,7 +95,7 @@ for milli in range(200000):
                     mmultindex += 1
 
             skillcount[j] = 0
-            damage_total += (skilldmg[j][skilllevel]+skillscaling[j]*magicpower)*120/(120+enemy_mr-mpen)*AoE[j]
+            damage_total += (skilldmg[j][skilllevel-1]+skillscaling[j]*magicpower)*120/(120+enemy_mr-mpen)*AoE[j]
             for skilli in range(3):
                 for hit in range(multihit[j]):
                     skillcount[skilli] += 500
